@@ -1,4 +1,4 @@
-# amalgame-framework-crypto
+# amalgame-crypto
 
 Pure-Amalgame crypto facade for [Amalgame](https://github.com/amalgame-lang/Amalgame).
 **SHA-256** (FIPS 180-4) and **HMAC-SHA-256** (RFC 2104).
@@ -10,7 +10,7 @@ this external package as part of the framework split (post-v0.7.5).
 
 ```bash
 amc package add crypto                  # via the curated index
-amc package add github.com/amalgame-lang/amalgame-framework-crypto@v0.1.0
+amc package add github.com/amalgame-lang/amalgame-crypto@v0.1.0
 ```
 
 Requires **amc 0.7.6+** for the facade pre-compile pipeline

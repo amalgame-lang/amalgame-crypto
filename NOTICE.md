@@ -1,4 +1,4 @@
-# NOTICE — amalgame-framework-crypto
+# NOTICE — amalgame-crypto
 
 ## Authorship
 
