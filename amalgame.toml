@@ -1,4 +1,4 @@
-# Package manifest — amalgame-framework-crypto
+# Package manifest — amalgame-crypto
 #
 # Pure-Amalgame crypto facade — SHA-256 (FIPS 180-4) and
 # HMAC-SHA-256 (RFC 2104) primitives. Originally bundled in amc's
@@ -8,7 +8,7 @@
 # Installation:
 #
 #   amc package add crypto                  # via curated index
-#   amc package add github.com/amalgame-lang/amalgame-framework-crypto@v0.1.0
+#   amc package add github.com/amalgame-lang/amalgame-crypto@v0.1.0
 #
 # At install time amc precompiles `facade.am` into
 # `<pkg-cache>/build/<platform>/libamalgame-pkg-Crypto.a` (PR #377
@@ -16,7 +16,7 @@
 # auto-link the archive.
 
 [package]
-name              = "amalgame-framework-crypto"
+name              = "amalgame-crypto"
 version           = "0.1.0"
 license           = "Apache-2.0"
 description       = "Pure-Amalgame crypto facade: SHA-256 (FIPS 180-4) + HMAC-SHA-256 (RFC 2104)."
