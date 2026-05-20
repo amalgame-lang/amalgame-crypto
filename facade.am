@@ -399,6 +399,92 @@ public class Hmac {
     }
 }
 
+// ── Bytes — string / bytes / hex conversion helpers ───
+//
+// AEAD callers routinely need to convert plain strings to
+// List<int> (for SealAes256Gcm input), and bytes back to hex for
+// transport. Sha256.Bytes / Hex already cover the digest path;
+// these helpers cover the symmetric/AEAD path.
+//
+// All entries in returned byte lists are in [0, 255]. HexToBytes
+// returns an empty list on malformed input (odd length, non-hex
+// char); callers detect this by checking Count() against the
+// expected output length.
+public class Bytes {
+    public Bytes() {}
+
+    // UTF-8 byte view of `s`. Amalgame strings are already
+    // char* of UTF-8 in the runtime, so this is a straight copy.
+    public static List<int> FromString(s: string) {
+        var out: List<int> = new List<int>()
+        @c {
+            if (!s) s = "";
+            size_t len = strlen(s);
+            out = amalgame_crypto_bytes_to_list((const uint8_t*) s, len);
+        }
+        return out
+    }
+
+    // Bytes back to a NUL-terminated string. Caller is responsible
+    // for ensuring the bytes form valid UTF-8 if downstream code
+    // expects that.
+    public static string ToString(b: List<int>) {
+        var out: string = ""
+        @c {
+            size_t len; uint8_t* buf = amalgame_crypto_list_to_bytes(b, &len);
+            char* s = (char*) GC_MALLOC(len + 1);
+            memcpy(s, buf, len);
+            s[len] = 0;
+            out = s;
+        }
+        return out
+    }
+
+    // Lowercase hex of all bytes.
+    public static string ToHex(b: List<int>) {
+        var out: string = ""
+        @c {
+            size_t len; uint8_t* buf = amalgame_crypto_list_to_bytes(b, &len);
+            out = amalgame_crypto_bytes_to_hex(buf, len);
+        }
+        return out
+    }
+
+    // Parse a lowercase OR uppercase hex string into bytes.
+    // Returns an empty list on odd length / non-hex char.
+    public static List<int> FromHex(h: string) {
+        var out: List<int> = new List<int>()
+        @c {
+            if (!h) h = "";
+            size_t n = strlen(h);
+            if (n % 2 != 0) {
+                /* leave out empty */
+            } else {
+                size_t bytes_len = n / 2;
+                uint8_t* buf = (uint8_t*) GC_MALLOC_ATOMIC(bytes_len > 0 ? bytes_len : 1);
+                int ok = 1;
+                for (size_t i = 0; i < bytes_len; i++) {
+                    char ch1 = h[2*i], ch2 = h[2*i+1];
+                    int hi, lo;
+                    if      (ch1 >= '0' && ch1 <= '9') hi = ch1 - '0';
+                    else if (ch1 >= 'a' && ch1 <= 'f') hi = ch1 - 'a' + 10;
+                    else if (ch1 >= 'A' && ch1 <= 'F') hi = ch1 - 'A' + 10;
+                    else { ok = 0; break; }
+                    if      (ch2 >= '0' && ch2 <= '9') lo = ch2 - '0';
+                    else if (ch2 >= 'a' && ch2 <= 'f') lo = ch2 - 'a' + 10;
+                    else if (ch2 >= 'A' && ch2 <= 'F') lo = ch2 - 'A' + 10;
+                    else { ok = 0; break; }
+                    buf[i] = (uint8_t)((hi << 4) | lo);
+                }
+                if (ok) {
+                    out = amalgame_crypto_bytes_to_list(buf, bytes_len);
+                }
+            }
+        }
+        return out
+    }
+}
+
 // ── AeadResult — return type for `Aead.OpenAes256Gcm` ───
 // AM containers are never null, so we can't signal auth failure
 // by returning a null list. The Ok bool disambiguates an empty
